@@ -74,7 +74,7 @@ class StochasticOutlierSelectionTest {
   @Test
   def test2(): Unit ={
     val INPUT_FILE_PATH="file:///"+this.getClass.getResource("sz000001_20181204.csv");
-    val rowTypeInfo=new RowTypeInfo(new TypeInformation[] {Types.STRING},new String[]{"security_code"})
-    val data=CsvTableSource.builder.path(INPUT_FILE_PATH).field(rowTypeInfo.getFieldNames,rowTypeInfo.getFieldTypes).getDataSet()
+//    val rowTypeInfo=new RowTypeInfo(new TypeInformation[] {Types.STRING},new String[]{"security_code"})
+//    val data=CsvTableSource.builder.path(INPUT_FILE_PATH).field(rowTypeInfo.getFieldNames,rowTypeInfo.getFieldTypes).getDataSet()
   }
 }
