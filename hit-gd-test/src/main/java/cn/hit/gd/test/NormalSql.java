@@ -146,4 +146,35 @@ public class NormalSql {
         System.out.println(env.getExecutionPlan());
         env.execute();
     }
+
+    @Test
+    public void testExternalTableSql() throws Exception{
+        List<Row> leftData=new ArrayList<Row>();
+        leftData.add(Row.of("111",new BigDecimal("60"),2000L));
+
+        TypeInformation<?>[] leftTypes={
+                BasicTypeInfo.STRING_TYPE_INFO,
+                BasicTypeInfo.BIG_DEC_TYPE_INFO,
+                BasicTypeInfo.LONG_TYPE_INFO
+        };
+
+        String[] leftNames={"security_code","close_price","quotation_time"};
+        RowTypeInfo leftTypeInfo=new RowTypeInfo(leftTypes,leftNames);
+
+        DataStream<Row> leftDataStream=env.fromCollection(leftData).returns(leftTypeInfo).assignTimestampsAndWatermarks(new AscendingTimestampExtractor<Row>() {
+            @Override
+            public long extractAscendingTimestamp(Row row) {
+                return (Long)row.getField(row.getArity()-1);
+            }
+        });
+
+//        leftDataStream.print();
+
+        //TODO:抄一下multiProcess  StreamSchema
+        Table leftIn=tableEnv.fromDataStream(leftDataStream,"security_code, close_price, quotation_time.rowtime");
+        tableEnv.registerTable("myLeftTable",leftIn);
+
+//        DataSet externalSet=
+
+    }
 }
