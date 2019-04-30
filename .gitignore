@@ -154,3 +154,4 @@ dmypy.json
 .idea/scala_compiler.xml
 .idea/uiDesigner.xml
 .idea/workspace.xml
+/hit-gd-test/target/
