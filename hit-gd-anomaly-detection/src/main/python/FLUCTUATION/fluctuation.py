@@ -86,7 +86,7 @@ dfSFluctuation['股票涨跌幅']=(dfSFluctuation['最新价']-dfSFluctuation['�
 
 #%% 读入股指tick日期-最新价
 #dfItk=pd.read_csv('merge-30.csv')
-#dfItk=pd.read_csv('D:/18-19/graduationDesign/data/Stk_Tick/Stk_Tick_SZ399107/mergeSZ399107_Tick.csv')
+#dfItk=pd.read_csv('D:/18-19/graduationDesign/data/Stk_Tick/Stk_Tick_SZ399107/mergeSZ399107_Tick_201505.csv')
 dfItk=pd.read_csv('D:/18-19/graduationDesign/data/Stk_Tick/Stk_Tick_SZ399107/sz399107_20150504.csv')
 #head="市场代码,证券代码,时间,最新价,成交笔数,成交额,成交量,方向,买一价,买二价,买三价,买四价,买五价,卖一价,卖二价,卖三价,卖四价,卖五价,买一量,买二量,买三量,买四量,买五量,卖一量,卖二量,卖三量,卖四量,卖五量"
 #columnHeadTuple=head.split(",")
@@ -98,7 +98,7 @@ dfItkU=dfItk.loc[:,['时间','交易时间按3s','日期','最新价','3s']]
 #print(dfItkU[0:5])
 
 #%% 读入股指日线 昨收价
-dfIDay=pd.read_csv('D:/18-19/graduationDesign/data/Idx_DAY_20190223/SZ399107.csv')
+dfIDay=pd.read_csv('D:/18-19/graduationDesign/data/Idx_DAY_20190223/SZ399107_day.csv')
 #dayHead='代码,时间,开盘价,最高价,最低价,收盘价,成交量(股),成交额(元)'
 #dayHeadTuple=dayHead.split(',')
 dfIDay.rename(columns={'时间':'当前交易日'}, inplace = True)
@@ -130,21 +130,28 @@ dfIFluctuation['股指涨跌幅']=(dfIFluctuation['最新价']-dfIFluctuation['�
 dfFluctuationDeviation=pd.merge(dfSFluctuation, dfIFluctuation, how='left', 
       left_index=True, right_index=True, sort=False,
       suffixes=('_x', '_y'), copy=True, indicator=False)
+dfFluctuationDeviation.fillna(method = 'backfill', axis = 0)
 dfFluctuationDeviation['偏离值']=abs(dfFluctuationDeviation['股票涨跌幅']-dfFluctuationDeviation['股指涨跌幅'])
 #print(dfFluctuationDeviation[0:5])
 dfOutliers=dfFluctuationDeviation[dfFluctuationDeviation['偏离值']>0.02]
-#dfOutliers.to_csv('dfFluctuationDeviation.csv')
+#print(dfOutliers[0:5])
+dfOutliers.to_csv('dfFluctuationDeviation.csv')
 
 dfOutliersDraw=dfFluctuationDeviation.loc[:,['最新价_x','昨收价_x','股票涨跌幅','股指涨跌幅','偏离值']]#
 #dfOutliersDraw.plot(figsize=(12,8))
-
 dfOutliersDraw.dropna(inplace=True)
+dfOutliersDraw['离群点']=dfOutliersDraw['最新价_x']
+dfOutliersDraw['离群点'][dfOutliersDraw['偏离值']<0.02]=None
+#print(dfOutliersDraw[0:5])
+
+
 fig = plt.figure(figsize=(12,8))
 plt.subplots_adjust(hspace=0.8)
 ax1 = fig.add_subplot(211)
 A1,=plt.plot(dfOutliersDraw.index.values,dfOutliersDraw['最新价_x'].values,label='最新价_x')
 B1,=plt.plot(dfOutliersDraw.index.values,dfOutliersDraw['昨收价_x'].values,label='昨收价_x')
-ax1.legend(handles=[A1,B1]) 
+C1,=plt.plot(dfOutliersDraw.index.values,dfOutliersDraw['离群点'].values,label='离群点',color='r',linewidth = '1')
+ax1.legend(handles=[A1,B1,C1],loc='lower right') 
 #ax1.plot(dfOutliersDraw.index.values,dfOutliersDraw['最新价_x'].values,dfOutliersDraw['昨收价_x'].values)
 #设置坐标轴数量和倾斜角度
 for ind, line in enumerate(ax1.xaxis.get_ticklines()):
@@ -161,7 +168,9 @@ for ind, label in enumerate(ax1.xaxis.get_ticklabels()):
 ax1.set_xlabel("时间",fontsize=17)
 ax1.set_ylabel("最新价",fontsize=17)
 
+
 ax2 = fig.add_subplot(212)
+plt.subplots_adjust(hspace=0.8)
 A2,=plt.plot(dfOutliersDraw.index.values,dfOutliersDraw['股票涨跌幅'].values,label='股票涨跌幅')
 B2,=plt.plot(dfOutliersDraw.index.values,dfOutliersDraw['股指涨跌幅'].values,label='股指涨跌幅')
 C2,=plt.plot(dfOutliersDraw.index.values,dfOutliersDraw['偏离值'].values,color='r',label='偏离值')
@@ -181,7 +190,7 @@ for ind, label in enumerate(ax2.xaxis.get_ticklabels()):
         label.set_visible(False)
 ax2.set_xlabel("时间",fontsize=17)
 ax2.set_ylabel("涨跌幅",fontsize=17)
-plt.savefig('最新价+涨跌幅_20150504.png')
-plt.show()
+plt.savefig('最新价+涨跌幅_20150504.png',bbox_inches = 'tight')
+#plt.show()
 
 
