@@ -27,53 +27,8 @@ _rebuild()
 myfont = matplotlib.font_manager.FontProperties(fname='/Users/weihuang/Downloads/simheittf/simhei.ttf') 
 mpl.rcParams['font.sans-serif'] = ['SimHei'] # 指定默认字体
 mpl.rcParams['axes.unicode_minus'] = False # 解决保存图像是负号'-'显示为方块的问题
-#
-# 移动平均图
-font = {'family': 'simhei', 'weight': 'normal', 'size': 20}
-def draw_trend(timeSeries, size):
-    f = plt.figure(facecolor='white',figsize=(10,8))
-    # 对size个数据进行移动平均
-    rol_mean = timeSeries.rolling(window=size).mean()
 
-
-    timeSeries.plot(color='blue', label='Original')
-    rol_mean.plot(color='red', label='Rolling Mean')
-    #rol_weighted_mean.plot(color='black', label='Weighted Rolling Mean')
-    #print(ts.adfuller(rol_weighted_mean))
-    print (rol_mean)
-    plt.legend(loc='best')
-    plt.title('Rolling Mean')
-    plt.show()
-    return rol_mean
-
-def draw_ts(timeSeries):
-    f = plt.figure(facecolor='white')
-    timeSeries.plot(color='blue')
-    plt.show()
-def testStationarity(ts):
-    dftest = ts.adfuller(ts)
-    # 对上述函数求得的值进行语义描述
-    dfoutput = pd.Series(dftest[0:4], index=['Test Statistic','p-value','#Lags Used','Number of Observations Used'])
-    for key,value in dftest[4].items():
-        dfoutput['Critical Value (%s)'%key] = value
-    return dfoutput
-
-# 自相关和偏相关图，默认阶数为31阶
-def draw_acf_pacf(ts, lags=31):
-    f = plt.figure(facecolor='white')
-    ax1 = f.add_subplot(211)
-    plot_acf(ts, lags=40, ax=ax1)
-    ax2 = f.add_subplot(212)
-    plot_pacf(ts, lags=40, ax=ax2)
-    plt.show()
-def adf_test(inputSeries):
-    print(type(inputSeries))
-    adftest = ts.adfuller(inputSeries, autolag='AIC')
-    adf_res = pd.Series(adftest[0:4], index=['Test Statistic','p-value','Lags Used','Number of Observations Used'])
-    for key, value in adftest[4].items():
-        adf_res['Critical Value (%s)' % key] = value
-    return adf_res
-#% 日期-最新价
+#%% 日期-最新价
 #df=pd.read_csv('merge-30.csv')
 df=pd.read_csv('D:/18-19/graduationDesign/data/Stk_Tick/Stk_Tick_SZ01/mergeSZ000001_Tick_201505.csv')
 #df=pd.read_csv('D:/18-19/graduationDesign/data/Stk_Tick/Stk_Tick_SZ01/mergeSZ000001_Tick_201812.csv')
@@ -126,7 +81,7 @@ plt.ylabel("最新价",fontsize=17)
 #plt.legend(loc='best',prop=font)
 plt.show()
 print (ts.adfuller(price2))
-#%差分
+#%%差分
 def draw1(timeSeries):
     f = plt.figure(facecolor='white',figsize=(10,8))
     # 对size个数据进行移动平均
@@ -238,16 +193,17 @@ print(sm.stats.durbin_watson(arma_mod_3.resid.values))
 #fig = qqplot(resid, line='q', ax=ax, fit=True)
 
 
-#%% 
+#%%  预测，绘图
 model = sm.tsa.ARIMA(logDiffer,(3,1,4))
 results_AR = model.fit()  
+print(results_AR.fittedvalues[0:5])
+#sum1=(results_AR.fittedvalues-price2.diff(1))**2
+#print(sum1)
+
 plt.figure(figsize=(12,10))
 l1,=plt.plot(logDiffer,color='green')
 l2,=plt.plot(results_AR.fittedvalues, color='red',linestyle='--')
-#sum1=(results_AR.fittedvalues-price2.diff(1))**2
-#print(sum1)
-#plt.title('SSE: %.4f'%0.1=1249,fontsize=18)
 plt.legend(handles=[l1, l2], labels=['最新价', '预测价'],loc = 0,prop={'size':15})
-plt.xlabel("日期",fontsize=17)
-plt.ylabel("一阶差分预测-最新价",fontsize=17)
+plt.xlabel("时间",fontsize=17)
+plt.ylabel("预测价/最新价(一阶差分)",fontsize=17)
 plt.show()
